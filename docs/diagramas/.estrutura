@@ -1,0 +1,12 @@
+meuprojeto/
+├── README.md
+├── LICENSE
+├── CONTACT.md
+├── docs/
+│   ├── arquitetura/
+│   └── diagramas/
+├── src/
+│   ├── api/
+│   ├── core/
+├── extras/
+│   └── exemplos/
