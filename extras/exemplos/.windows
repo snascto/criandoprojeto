@@ -1,0 +1,15 @@
+# Guia de Uso no Windows
+
+Este script funciona em **Windows** usando o terminal **Git Bash**.
+
+## 1. Requisitos
+
+- Instalar Git: [https://git-scm.com](https://git-scm.com)
+- Instalar GitHub CLI: [https://cli.github.com](https://cli.github.com)
+
+## 2. Autenticar GitHub CLI
+
+
+gh auth login
+# Escolha: GitHub.com
+# Método: SSH
