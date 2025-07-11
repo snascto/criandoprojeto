@@ -1,0 +1,11 @@
+COMO USAR
+Salve como criador_projeto_estruturado_github.sh
+
+Dê permissão de execução:
+
+
+chmod +x criador_projeto_estruturado_github.sh
+Execute:
+
+
+./criador_projeto_estruturado_github.sh
