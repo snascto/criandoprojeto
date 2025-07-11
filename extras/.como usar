@@ -7,5 +7,12 @@ Dê permissão de execução:
 chmod +x criador_projeto_estruturado_github.sh
 Execute:
 
+Publicando no Github
 
-./criador_projeto_estruturado_github.sh
+./criador_projeto_estruturado_github.shgit clone git@github.com:SEU_USUARIO/criador-projeto-github.git
+cd criador-projeto-github
+
+
+
+
+
