@@ -1,0 +1,148 @@
+#!/bin/bash
+
+# ===============================================================
+# SCRIPT: CRIADOR DE ESTRUTURA DE PROJETO PADRÃO + GITHUB
+# ===============================================================
+# Autor: Santo Nascimento
+# Revisado: jul/2025
+# Licença: MIT
+# ===============================================================
+
+clear
+echo "=============================================="
+echo "      🔧 CRIADOR DE PROJETOS - GITHUB CLI"
+echo "=============================================="
+
+# === 1. INFORMAÇÕES DO PROJETO ===
+read -p "📦 Nome do projeto (slug, sem espaços): " PROJECT_NAME
+read -p "📝 Descrição do projeto: " PROJECT_DESC
+read -p "🔓 Visibilidade do repositório [public/private]: " REPO_VISIBILITY
+
+# Diretório onde o projeto será criado
+BASE_DIR=$(pwd)/"$PROJECT_NAME"
+mkdir -p "$BASE_DIR"
+
+# === 2. ESTRUTURA PADRÃO ===
+declare -a DEFAULT_FOLDERS=("docs" "src")
+declare -a DEFAULT_FILES=("README.md" "LICENSE" "CONTACT.md")
+
+echo "🚧 Criando estrutura padrão..."
+for file in "${DEFAULT_FILES[@]}"; do
+    touch "$BASE_DIR/$file"
+done
+
+for folder in "${DEFAULT_FOLDERS[@]}"; do
+    mkdir -p "$BASE_DIR/$folder"
+done
+
+echo "# $PROJECT_NAME" > "$BASE_DIR/README.md"
+echo "📧 Contato do projeto." > "$BASE_DIR/CONTACT.md"
+
+# === 3. OPÇÃO DE SUBPASTAS DENTRO DAS PADRÕES ===
+for folder in "${DEFAULT_FOLDERS[@]}"; do
+    read -p "➕ Deseja subpastas dentro de '$folder'? [s/n]: " SUB_OK
+    if [[ "$SUB_OK" == "s" ]]; then
+        read -p "   ✍️ Subpastas (separadas por espaço): " -a SUBLIST
+        for sub in "${SUBLIST[@]}"; do
+            mkdir -p "$BASE_DIR/$folder/$sub"
+            touch "$BASE_DIR/$folder/$sub/.gitkeep"
+        done
+    fi
+done
+
+# === 4. ESCOLHA DE LICENÇA ===
+echo ""
+echo "📄 Selecione a licença:"
+echo "1 - MIT"
+echo "2 - Apache 2.0"
+echo "3 - GNU GPL v3"
+echo "4 - Nenhuma"
+read -p "Escolha [1-4]: " LICENSE_CHOICE
+
+LICENSE_FILE="$BASE_DIR/LICENSE"
+YEAR=$(date +%Y)
+AUTHOR=$(git config user.name || echo "Autor Desconhecido")
+
+case "$LICENSE_CHOICE" in
+  1)
+    echo "Selecionado: MIT"
+    cat > "$LICENSE_FILE" <<EOF
+MIT License
+
+Copyright (c) $YEAR $AUTHOR
+
+Permission is hereby granted, free of charge, to any person obtaining a copy...
+[Conteúdo completo da licença MIT]
+EOF
+    ;;
+  2)
+    echo "Selecionado: Apache 2.0"
+    cat > "$LICENSE_FILE" <<EOF
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+[Conteúdo completo da licença Apache 2.0]
+EOF
+    ;;
+  3)
+    echo "Selecionado: GPL v3"
+    cat > "$LICENSE_FILE" <<EOF
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+[Conteúdo completo da licença GPL]
+EOF
+    ;;
+  *)
+    echo "Nenhuma licença adicionada."
+    ;;
+esac
+
+# === 5. CRIAR PASTAS PERSONALIZADAS (EXTRAS) ===
+while true; do
+    read -p "➕ Deseja adicionar mais pastas personalizadas? [s/n]: " ADD_MORE
+    [[ "$ADD_MORE" != "s" ]] && break
+
+    read -p "   📁 Nome da nova pasta: " NEW_FOLDER
+    mkdir -p "$BASE_DIR/$NEW_FOLDER"
+    touch "$BASE_DIR/$NEW_FOLDER/.gitkeep"
+
+    read -p "   ➕ Deseja subpastas para $NEW_FOLDER? [s/n]: " SUB_ANSWER
+    if [[ "$SUB_ANSWER" == "s" ]]; then
+        read -p "   ✍️ Subpastas (separadas por espaço): " -a SUBFOLDERS
+        for sub in "${SUBFOLDERS[@]}"; do
+            mkdir -p "$BASE_DIR/$NEW_FOLDER/$sub"
+            touch "$BASE_DIR/$NEW_FOLDER/$sub/.gitkeep"
+        done
+    fi
+done
+
+# === 6. INICIALIZAÇÃO GIT ===
+echo "🔧 Inicializando Git local..."
+cd "$BASE_DIR" || exit 1
+git init
+git add .
+git commit -m "🎉 Estrutura inicial do projeto"
+
+# === 7. VERIFICAÇÃO GH CLI ===
+echo "🔐 Verificando autenticação com GitHub CLI..."
+if ! gh auth status &>/dev/null; then
+    echo "❌ Você precisa autenticar com o GitHub CLI antes de continuar."
+    echo "Execute: gh auth login"
+    exit 1
+fi
+
+# === 8. CRIAÇÃO DO REPOSITÓRIO REMOTO ===
+echo "🌐 Criando repositório remoto com gh CLI..."
+gh repo create "$PROJECT_NAME" \
+    --"$REPO_VISIBILITY" \
+    --description "$PROJECT_DESC" \
+    --source . \
+    --remote origin \
+    --push
+
+# === 9. CONCLUSÃO ===
+REPO_USER=$(gh api user --jq '.login')
+echo ""
+echo "✅ Projeto criado e publicado com sucesso!"
+echo "🔗 Link: https://github.com/${REPO_USER}/${PROJECT_NAME}"
+echo "📁 Diretório: $BASE_DIR"
